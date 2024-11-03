@@ -3,326 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dark Queen</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>IPTrace</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: #0d0d0d;
-            color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            position: relative;
-        }
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            text-align: center;
-            border-bottom: 2px solid #ff4d4d;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-        }
-        header h1 {
-            margin: 0;
-            color: #ff4d4d;
-            font-size: 3em;
-            text-shadow: 0 0 20px #ff4d4d;
-            animation: glow 2s infinite alternate;
-        }
-        @keyframes glow {
-            from {
-                text-shadow: 0 0 15px #ff4d4d;
-            }
-            to {
-                text-shadow: 0 0 30px #ff4d4d;
-            }
-        }
-        nav {
-            display: flex;
+        body, html {
+            font-family: Arial, sans-serif;
+            background-color: #282b30;
+            color: #e0e0e0;
             justify-content: center;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.8);
-            border-bottom: 1px solid #333;
-            position: fixed;
-            top: 80px;
+            align-items: center;
+            
+           
+        }
+       
+       
+        #map {
+            height: 400px;
             width: 100%;
-            z-index: 999;
-        }
-        nav a {
-            color: #ff4d4d;
-            text-decoration: none;
-            padding: 15px 30px;
-            font-weight: bold;
-            font-size: 1.2em;
-            transition: background-color 0.3s, transform 0.3s;
-            border-radius: 5px;
-            position: relative;
-            overflow: hidden;
-            margin: 0 5px;
-        }
-        nav a::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 300%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(-50%) rotate(45deg);
-            transition: all 0.3s;
-            z-index: 0;
-        }
-        nav a:hover::before {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(-50%) rotate(45deg) scale(1.5);
-        }
-        nav a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #ff4d4d;
-            transform: scale(1.1);
-        }
-        .container {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 120px auto 0;
-            position: relative;
-        }
-        .background-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            pointer-events: none;
-        }
-        .background-overlay::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.8) 100%);
-            transform: translate(-50%, -50%);
-            z-index: 0;
-        }
-        .content {
-            position: relative;
-            z-index: 1;
-        }
-        .section {
-            padding: 20px;
-            background: rgba(30, 30, 30, 0.8);
+            margin-top: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
         }
-        .section h2 {
-            color: #ff4d4d;
+       
+       
+        .output-container {
+            margin-top: 20px;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 300px;
+            white-space: nowrap;
+            text-align: left;
+          
+        }
+       
+       
+        /* Colored output for JSON keys */
+        .key { color: #8abeb7; } /* Teal for keys */
+        .string { color: #f8c555; } /* Yellow for strings */
+        .number { color: #b4b5ff; } /* Light blue for numbers */
+        .boolean { color: #f92672; } /* Red for boolean */
+        .null { color: #75715e; } /* Gray for null */
+        .abuse { color: #ff5555; font-weight: bold; } /* Highlight for abuse information */
+        .error { color: #ff5555; font-weight: bold; } /* Highlight for error messages */
+        .target-ip { color: #ffffff; } /* White color for "Target IP Details For" */
+        .public-details { color: #ffffff; } /* White color for "Your Public Details" */
+      
+      
+      .card {
+            width: 80%;
+            max-width: 500px;
+            padding: 10px;
+            background: rgba(30,30,30); /* Light transparent layer */
+            backdrop-filter: blur(15px); /* Blurred glass effect */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+           
+        }
+       
+       /* Centering container */
+        .center-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            gap: 10px;
+            
+        }
+        
+        input[type="text"] {
+            padding: 10px;
             margin-bottom: 10px;
-            font-size: 2.5em;
-            border-bottom: 2px solid #ff4d4d;
-            padding-bottom: 10px;
+            box-shadow: 0 0 10px rgba(33,150,243);
+            background: rgba(33,150,243) /* Light transparent layer */
+            backdrop-filter: blur(15px); /* Blurred glass effect */
+            box-shadow: 0 0 10px rgba(33,150,243);
+            border: 0px solid #555; /* Darker border */
+            border-radius: 7px;
+            font-family: 'Courier New', Courier, monospace; /* Monospace font */
+            
         }
-        .btn {
-            background-color: #ff4d4d;
-            color: #000;
+        
+        button {
+            padding: 10px 20px;
+            background-color: #008cff; /* Blue button */
+            color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 1.1em;
             border-radius: 5px;
             cursor: pointer;
-            text-align: center;
-            display: inline-block;
-            text-decoration: none;
-            transition: background-color 0.3s, transform 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 300%;
-            height: 300%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translate(-50%, -50%) rotate(45deg);
-            transition: all 0.3s;
-            z-index: 0;
-        }
-        .btn:hover::after {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%) rotate(45deg) scale(1.5);
-        }
-        .btn:hover {
-            background-color: #e6005c;
-            transform: scale(1.05);
-            color: #000;
-        }
-        footer {
-            background: rgba(0, 0, 0, 0.9);
-            color: #ddd;
-            text-align: center;
-            padding: 20px;
-            border-top: 1px solid #333;
-            position: relative;
-            bottom: 0;
-            width: 100%;
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.8);
-        }
-        .social-icons {
-            margin-top: 10px;
-        }
-        .social-icons a {
-            color: #ff4d4d;
-            font-size: 1.5em;
-            margin: 0 10px;
-            transition: color 0.3s, transform 0.3s;
-        }
-        .social-icons a:hover {
-            color: #e6005c;
-            transform: scale(1.1);
-        }
-        .user-count {
-            font-size: 1.2em;
-            margin: 20px 0;
-            color: #ff4d4d;
-            text-shadow: 0 0 10px #ff4d4d;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            box-shadow: 0 0 10px rgba(33,150,243);
+            
+        } 
+       
+                        /* Center loader on the screen */
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            background-color: #f3f3f3; /* Light background color */
+            z-index: 1000; /* Make sure it stays on top */
         }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
+
+        /* Style for the spinning loader */
+        .loader {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue color */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
         }
-        .data-table th, .data-table td {
-            padding: 12px;
-            border: 1px solid #333;
-            text-align: left;
-        }
-        .data-table th {
-            background-color: #333;
-            color: #ff4d4d;
-        }
-        .data-table td {
-            background-color: #222;
-        }
-        @media (min-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-        }
-        @media (min-width: 1200px) {
-            .container {
-                max-width: 1200px;
-            }
+
+        /* Animation for spinning */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>SPECTER</h1>
-    </header>
-    <nav>
-        <a href="#">Home</a>
-        <a href="#">Buy Data</a>
-        <a href="#">Sell Data</a>
-        <a href="#">Contact</a>
-    </nav>
-    <div class="container">
-        <div class="background-overlay"></div>
-        <div class="content">
-            <div class="user-count">
-                <p>Online Users: <span id="userCount">0</span></p>
-            </div>
-            <section class="section">
-                <h2>About Us</h2>
-                <p>Welcome to Specter ch, the premier marketplace for buying and selling data. Our platform provides secure, anonymous transactions with a sleek, dark web-inspired interface.</p>
-            </section>
-            <section class="section">
-                <h2>Data Categories and Prices</h2>
-                <table class="data-table">
-                    <thead>
-                        <tr><th>Category</th>
-                            <th>Description</th>
-                            <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Personal Data</td>
-                            <td>Includes names, addresses, and other personal information.</td>
-                            <td>$200</td>
-                        </tr>
-                        <tr>
-                            <td>Financial Data</td>
-                            <td>Bank details, credit card information, and financial records.</td>
-                            <td>$500</td>
-                        </tr>
-                        <tr>
-                            <td>Medical Data</td>
-                            <td>Health records and medical histories.</td>
-                            <td>$400</td>
-                        </tr>
-                        <tr>
-                            <td>Login Credentials</td>
-                            <td>Usernames and passwords for various online accounts.</td>
-                            <td>$300</td>
-                        </tr>
-                        <tr>
-                            <td>Intellectual Property</td>
-                            <td>Trade secrets, patents, and proprietary information.</td>
-                            <td>$1000</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-            <section class="section">
-                <h2>Buy Data</h2>
-                <p>Explore our extensive catalog of data sets available for purchase. We offer detailed descriptions and secure transactions to ensure a seamless buying experience.</p>
-                <a href="#" class="btn">Browse Data</a>
-            </section>
-            <section class="section">
-                <h2>Sell Data</h2>
-                <p>List your data sets for sale with ease. Our platform supports secure and anonymous listings, helping you to efficiently monetize your data.</p>
-                <a href="#" class="btn">Sell Data</a>
-            </section>
-            <section class="section">
-                <h2>Contact Us</h2>
-                <p>If you have any questions or need assistance, please do not hesitate to contact us. Our support team is here to help you.</p>
-                <a href="mailto:info@specterch.com" class="btn">Email Us</a>
-            </section>
-        </div>
+      <!-- Loader container -->
+<div class="loader-container" id="loader">
+    <div class="loader"></div>
+</div>
+    
+    <h1>IPTrace</h1>
+    <br>
+    <input type="text" id="ipInput" placeholder="Enter IP address">
+    <br>
+    <input type="text" id="tokenInput" placeholder="Enter API Token" required>
+    <br>
+    <button onclick="getIPDetails()">Get Details</button>
+    
+    <div class="output-container">
+        <h3 id="outputHeader">Details }</h3>
+        <pre id="output"></pre>
     </div>
-    <footer>
-        <p>© 2024 SPECTER. All rights reserved.</p>
-        <div class="social-icons">
-            <a href="#" class="fab fa-twitter"></a>
-            <a href="#" class="fab fa-facebook-f"></a>
-            <a href="#" class="fab fa-instagram"></a>
-        </div>
-    </footer>
+
+    <div id="map"></div>
+
+    <!-- Leaflet.js library -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        function getRandomOnlineUserCount() {
-            return Math.floor(Math.random() * 1000) + 1;
+        async function getIPDetails() {
+            const ip = document.getElementById("ipInput").value;
+            const token = document.getElementById("tokenInput").value;
+            const output = document.getElementById("output");
+            const outputHeader = document.getElementById("outputHeader");
+
+            if (!token) {
+                output.innerHTML = `<span class="error">Error: Please enter an API token.</span>`;
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://ipinfo.io/${ip || 'json'}?token=${token}`);
+                if (!response.ok) throw new Error('IP address not found.');
+
+                const data = await response.json();
+                const [latitude, longitude] = data.loc.split(',');
+
+                outputHeader.innerText = ip ? `Target IP Details for: ${ip}` : `Your Public Details`;
+                output.innerText = JSON.stringify(data, null, 2);
+
+                // Initialize or update the map with the location
+                displayMap(latitude, longitude);
+            } catch (error) {
+                output.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
         }
 
-        function updateOnlineUserCount() {
-            const userCountElement = document.getElementById('userCount');
-            userCountElement.textContent = getRandomOnlineUserCount();
-        }
+        function displayMap(lat, lng) {
+            const mapContainer = document.getElementById('map');
+            mapContainer.innerHTML = ''; // Clear any existing map instance
 
-        setInterval(updateOnlineUserCount, 1000);
+            const map = L.map(mapContainer).setView([lat, lng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup(`<b>Location:</b> ${lat}, ${lng}`)
+                .openPopup();
+        }
+                    // JavaScript to hide the loader once the page is fully loaded
+    window.addEventListener("load", function() {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("content").style.display = "block";
+    });
     </script>
 </body>
 </html>
